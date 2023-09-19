@@ -1,15 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-require('dotenv').config()
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
+// Define CORS options
+const corsOptions = {
+  origin: ['http://wallipy.art'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  optionsSuccessStatus: 204,
+};
+
 // Connect to your MongoDB database
-mongoose.connect('mongodb+srv://tricticle:_____vighnesh@cluster0.ynsd50o.mongodb.net/wallipy', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('Connected to wallipyserver');
+    console.log('Connected to MongoDB');
   })
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
