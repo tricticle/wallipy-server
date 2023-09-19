@@ -7,14 +7,7 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Define CORS options
-const corsOptions = {
-  origin: ['http://wallipy.art'],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  optionsSuccessStatus: 204,
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Connect to your MongoDB database
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -39,8 +32,14 @@ app.use(bodyParser.json());
 // Define routes to add, remove, and fetch data
 
 app.all('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "https://wallipy.art/");
   res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "Origin");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header("Access-Control-Allow-Headers", "Accept");
+  res.header("Origin", "*");
+  res.header("Access-Control-Allow-Methods","*");
+  res.header("Allow","*");
   next()
 });
 
