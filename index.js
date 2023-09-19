@@ -9,7 +9,7 @@ const port = process.env.PORT || 5000;
 // Connect to your MongoDB database
 mongoose.connect('mongodb+srv://tricticle:_____vighnesh@cluster0.ynsd50o.mongodb.net/wallipy', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Connected to wallipyserver');
   })
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
