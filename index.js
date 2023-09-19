@@ -43,8 +43,14 @@ app.all('/', function(req, res, next) {
   next()
 });
 
+app.get('/', (req, res) => {
+  res.send('😁    Welcome to wallipyServer    😁')
+  res.set('Access-Control-Allow-Origin', '*');
+})
+
 // Add data to MongoDB
 app.post('/addData', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   try {
     const { title, imageUrl, description } = req.body;
     const newImage = new Image({ title, imageUrl, description });
@@ -57,6 +63,7 @@ app.post('/addData', async (req, res) => {
 
 // Remove data from MongoDB by imageUrl
 app.delete('/removeData', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   try {
     const { imageUrl } = req.body;
     const image = await Image.findOneAndRemove({ imageUrl });
@@ -71,6 +78,7 @@ app.delete('/removeData', async (req, res) => {
 
 // Fetch all added data from MongoDB
 app.get('/addedData', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   try {
     const addedData = await Image.find();
     res.json(addedData);
