@@ -38,6 +38,12 @@ app.use(bodyParser.json());
 
 // Define routes to add, remove, and fetch data
 
+app.all('/', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next()
+});
+
 // Add data to MongoDB
 app.post('/addData', async (req, res) => {
   try {
