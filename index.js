@@ -9,21 +9,6 @@ const port = process.env.PORT || 5000;
 
 app.use(cors());
 
-
-app.all('/', function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "https://wallipy.art/");
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Origin", "Origin");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
-  res.header("Access-Control-Allow-Headers", "Accept");
-  res.header("Origin", "*");
-  res.header("Access-Control-Allow-Methods","*");
-  res.header("Allow","*");
-  next()
-});
-
-
-
 // Connect to your MongoDB database
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
@@ -45,7 +30,10 @@ const imageSchema = new mongoose.Schema({
   ],
 });
 
-const Image = mongoose.model('Image', imageSchema);
+// Create a function to dynamically get or create a collection based on the username
+function getImageCollection(username) {
+  return mongoose.model(`Image_${username}`, imageSchema);
+}
 
 app.use(bodyParser.json());
 
@@ -59,6 +47,9 @@ app.post('/addData', async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   try {
     const { title, imageUrl, description, username } = req.body;
+
+    // Get or create a collection for the specific username
+    const Image = getImageCollection(username);
 
     // Check if the user already exists in the database
     let userImage = await Image.findOne({ username });
@@ -88,6 +79,9 @@ app.delete('/removeData', async (req, res) => {
   try {
     const { imageUrl, username } = req.body;
 
+    // Get the specific collection for the username
+    const Image = getImageCollection(username);
+
     // Find the user by username
     const userImage = await Image.findOne({ username });
 
@@ -112,6 +106,9 @@ app.get('/addedData', async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   try {
     const { username } = req.query;
+
+    // Get the specific collection for the username
+    const Image = getImageCollection(username);
 
     // Find the user by username and return their data array
     const userImage = await Image.findOne({ username });
