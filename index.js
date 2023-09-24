@@ -123,6 +123,43 @@ app.get('/addedData', async (req, res) => {
   }
 });
 
+// Update data in MongoDB by imageUrl
+app.put('/updateData', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  try {
+    const { imageUrl, username, newTitle, newDescription } = req.body;
+
+    // Get the specific collection for the username
+    const Image = getImageCollection(username);
+
+    // Find the user by username
+    const userImage = await Image.findOne({ username });
+
+    if (!userImage) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find the image with the matching imageUrl in the user's data array
+    const imageToUpdate = userImage.data.find((image) => image.imageUrl === imageUrl);
+
+    if (!imageToUpdate) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    // Update the image's title and description
+    imageToUpdate.title = newTitle;
+    imageToUpdate.description = newDescription;
+
+    // Save the updated user document
+    await userImage.save();
+
+    res.json({ message: 'Image updated successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error updating data in MongoDB' });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
