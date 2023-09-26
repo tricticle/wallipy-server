@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const multer = require('multer');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -36,6 +37,27 @@ function getImageCollection(username) {
 }
 
 app.use(bodyParser.json());
+
+// Create a function to dynamically get or create a collection based on the username
+function getImageCollection(username) {
+  return mongoose.model(`Image_${username}`, imageSchema);
+}
+
+app.use(bodyParser.json());
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    // Set the destination folder where images will be stored
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    // Set the filename for the uploaded image
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, file.fieldname + '-' + uniqueSuffix + '.' + file.originalname.split('.').pop());
+  },
+});
+
+const upload = multer({ storage: storage });
 
 app.get('/', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
@@ -156,6 +178,42 @@ app.put('/updateData', async (req, res) => {
     res.json({ message: 'Image updated successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Error updating data in MongoDB' });
+  }
+});
+
+app.post('/uploadImage', upload.single('image'), async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  try {
+    const { username, title, description } = req.body;
+    const imageUrl = req.file.path; // The path to the uploaded image
+
+    // Get or create a collection for the specific username
+    const Image = getImageCollection(username);
+
+    // Check if the user already exists in the database
+    let userImage = await Image.findOne({ username });
+
+    if (!userImage) {
+      // If the user doesn't exist, create a new user document
+      userImage = new Image({
+        username,
+        data: [],
+      });
+    }
+
+    if (username !== 'tricticle') {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    // Add the new data to the user's data array
+    userImage.data.push({ title, imageUrl, description });
+
+    // Save the updated user document
+    await userImage.save();
+
+    res.status(201).json(userImage.data);
+  } catch (error) {
+    res.status(500).json({ error: 'Error uploading image and data to MongoDB' });
   }
 });
 
